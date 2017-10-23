@@ -6,7 +6,7 @@ set.seed(4)
 ls() 
 
 #population size
-n <- 100
+n <- 10
 ages <- sample(40:70,n,replace=TRUE) #uniform distribution
 class <- sample(0:1,n,replace=TRUE) #0 is mammo 1 is MRI
 
@@ -27,7 +27,6 @@ mriBIRADS <- function(class){
 }
 
 mriBenignVsCA <- function(grade){
-
   pCA <- -1
   
   if(is.na(grade)) {
@@ -56,9 +55,24 @@ mriBenignVsCA <- function(grade){
   return (eventProb);
 }
 
+
+mriStageCA <- function(x){
+ 
+  pTis <- .38
+  pT1a <- .08
+  pT1b <- .25
+  pT1c <- .23
+  pT2 <-  .06
+  
+  eventProb <- sample(c('Tis','T1a','T1b','T1c','T2'),size=1, replace = TRUE, c(pTis, pT1a, pT1b, pT1c, pT2))
+  
+  return (eventProb);
+}
+
 data <- data.frame(ages,class)
 
 data["mriBIRADS"] <- mapply(mriBIRADS, data$class)
-data["benignVsCA"] <- mapply(mriBenignVsCA, data$mriBIRADS)
+data["mribenignVsCA"] <- mapply(mriBenignVsCA, data$mriBIRADS)
+data["StageCA"] <- mapply(mriStageCA, data$mribenignVsCA)
 
 data
