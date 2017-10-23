@@ -6,7 +6,7 @@ set.seed(4)
 ls() 
 
 #population size
-n <- 10
+n <- 100
 ages <- sample(40:70,n,replace=TRUE) #uniform distribution
 class <- sample(0:1,n,replace=TRUE) #0 is mammo 1 is MRI
 
@@ -21,7 +21,7 @@ mriBIRADS <- function(class){
   pBR4 <- 0.081 * (1/2)
   pBR5 <- 0.081 * (1/2)
 
-  eventProb <- sample(c('BR1','BR2','BR3', 'BR4', 'B53'),size=1, replace = TRUE, c(pBR1, pBR2, pBR3, pBR4, pBR5))
+  eventProb <- sample(c('BR1','BR2','BR3', 'BR4', 'BR5'),size=1, replace = TRUE, c(pBR1, pBR2, pBR3, pBR4, pBR5))
 
   return (eventProb);
 }
@@ -36,15 +36,11 @@ mriBenignVsCA <- function(grade){
   else if (grade == 'BR1' | grade == 'BR2'){
     pCA <- 0
   }
-  else if (grade == 'BR3'){ ## CHECK THIS DATA POINT
+  else if (grade == 'BR3'){ ## DOUBLE CHECK THIS DATA POINT
     pCA <- 0
   }
-  else if (grade == 'BR4'){
-    print('BR4')
-    pCA <- .02
-  }
-  else if (grade == 'BR5'){ ## CHECK THIS DATA POINT
-    pCA <- .02
+  else if (grade == 'BR4' | grade == 'BR5'){
+    pCA <- 48/2120
   }
   else {
     return (NA)
@@ -56,8 +52,16 @@ mriBenignVsCA <- function(grade){
 }
 
 
-mriStageCA <- function(x){
- 
+mriStageCA <- function(cancerStatus){
+  
+  if(is.na(cancerStatus)) {
+    return (NA)
+  }
+  
+  if (cancerStatus == "Benign"){
+    return(NA);
+  }
+  
   pTis <- .38
   pT1a <- .08
   pT1b <- .25
@@ -69,10 +73,46 @@ mriStageCA <- function(x){
   return (eventProb);
 }
 
+mriIncidentBIRADS <- function(cancerStatus){
+  
+  if(is.na(cancerStatus)) {
+    return (NA)
+  }
+  
+  if (cancerStatus== 'Benign')
+    return(NA);
+  
+  pBR1 <- .96 * (1/2)
+  pBR2 <- .96 * (1/2)
+  pBR3 <- .032
+  pBR4 <- 0.007 * (1/2)
+  pBR5 <- 0.007 * (1/2)
+  
+  eventProb <- sample(c('BR1','BR2','BR3', 'BR4', 'BR5'),size=1, replace = TRUE, c(pBR1, pBR2, pBR3, pBR4, pBR5))
+  
+  return (eventProb);
+}
+
+mriIncidentBiopsy <- function(grade){
+  
+  if(is.na(grade) | grade == 'BR1' | grade == 'BR2' ) {
+    return (NA)
+  }
+  
+  pBiopsy = .333
+  
+  eventProb <- sample(c('YesBiopsy','NoBiopsy'),size=1, replace = TRUE, c(pBiopsy, 1-pBiopsy))
+  
+  return (eventProb);
+}
+
 data <- data.frame(ages,class)
 
 data["mriBIRADS"] <- mapply(mriBIRADS, data$class)
 data["mribenignVsCA"] <- mapply(mriBenignVsCA, data$mriBIRADS)
-data["StageCA"] <- mapply(mriStageCA, data$mribenignVsCA)
+data["mriStageCA"] <- mapply(mriStageCA, data$mribenignVsCA)
+
+data["mriIncidentBIRADS"] <-mapply(mriIncidentBIRADS, data$mriStageCA)
+data["mriIncidentBiopsy"] <-mapply(mriIncidentBIRADS, data$mriIncidentBIRADS)
 
 data
