@@ -7,8 +7,8 @@ ls()
 
 #population size
 n <- 100
-ages <- sample(40:70,n,replace=TRUE) #uniform distribution
-class <- sample(0:1,n,replace=TRUE) #0 is mammo 1 is MRI
+ages <- sample(40:70,n,replace=TRUE) #uniform distribution, will change later <Task>
+class <- sample(0:1,n,replace=TRUE) #0 is mammo arm & 1 is MRI arm
 
 mriBIRADS <- function(class){
   
@@ -18,7 +18,9 @@ mriBIRADS <- function(class){
   pBR1 <- .863 * (1/2)
   pBR2 <- .863 * (1/2)
   pBR3 <- .057
-  pBR4 <- 0.081 * (1/2)
+  #pBR4 <- 0.081 * (1/2)
+  pBR4 <- 1 * (1/2)
+  
   pBR5 <- 0.081 * (1/2)
 
   eventProb <- sample(c('BR1','BR2','BR3', 'BR4', 'BR5'),size=1, replace = TRUE, c(pBR1, pBR2, pBR3, pBR4, pBR5))
@@ -40,7 +42,8 @@ mriBenignVsCA <- function(grade){
     pCA <- 0
   }
   else if (grade == 'BR4' | grade == 'BR5'){
-    pCA <- 48/2120
+    pCA <- 1
+    #pCA <- 48/2120
   }
   else {
     return (NA)
@@ -79,7 +82,7 @@ mriIncidentBIRADS <- function(cancerStatus){
     return (NA)
   }
   
-  if (cancerStatus== 'Benign')
+  if (cancerStatus == 'CA') #Only Benign Patients Screened
     return(NA);
   
   pBR1 <- .96 * (1/2)
