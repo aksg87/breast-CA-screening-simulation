@@ -131,6 +131,8 @@ mriIncidentBiopsy <- function(grade){
 
 data <- data.frame(ages,class)
 
+
+
 data["MRI_Prev_BIRADS"] <- mapply(mriBIRADS, data$class)
 data["MRI_BenignVsCA"] <- mapply(mriBenignVsCA, data$MRI_Prev_BIRADS)
 data["MRI_StageCA"] <- mapply(mriStageCA, data$MRI_BenignVsCA)
@@ -138,9 +140,17 @@ data["MRI_StageCA"] <- mapply(mriStageCA, data$MRI_BenignVsCA)
 data["MRI_Inc_BIRADS"] <-mapply(mriIncidentBIRADS, data$MRI_BenignVsCA)
 data["MRI_Inc_Biopsy"] <-mapply(mriIncidentBiopsy, data$MRI_Inc_BIRADS)
 
+
 data[sapply(data, is.character)] <- lapply(data[sapply(data, is.character)], as.factor)
 
 summary(data)
 
 write.table(data, na = "", file = "mammo-MRI-screening.csv", sep = ",", col.names = NA, qmethod = "double")
 
+
+testName <- "TEST"
+
+data[testName] <- mapply(mriIncidentBiopsy, data$MRI_Inc_BIRADS)
+data
+
+testName <- testName + "1"
