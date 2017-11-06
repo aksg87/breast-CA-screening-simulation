@@ -4,7 +4,8 @@ set.seed(4)
 vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - 1) * exp(-.25*k*t))^4}
 
 generate_K <- function(α1, α2) {
-
+  #https://msalganik.wordpress.com/2017/01/21/making-sense-of-the-rlnorm-function-in-r/
+  
   m <- α1
   s <- 1.31
   location <- log(m^2 / sqrt(s^2 + m^2))
@@ -31,6 +32,7 @@ generate_tumor <- function(α1, α2) {
   }
   else
     return( c(α1=α1, α2=α2,tumor_year=tumor_year, k=k))
+    #return( tumor_year)
 }
 
 ks <- generate_K(1.07,1.31)
@@ -39,9 +41,36 @@ generate_tumor(1.07,1.31)
 
 
 
+# *************
 
-#https://msalganik.wordpress.com/2017/01/21/making-sense-of-the-rlnorm-function-in-r/
-#one million draws from a log-normal distribution with a mean of 7 and a standard deviation of 75
+ages <-sample(40:70, 100, replace = TRUE)
+pCA <- 0.02
+gen_Ca <- function(age) { sample(c('Benign', 'CA'),size = 1, replace = TRUE, c(1 - pCA, pCA))}
+
+apply_genTumor <- function(cancerStatus) {
+    
+  if (cancerStatus != 'CA')
+    return (NA)
+  else
+    return (generate_tumor(1.07,1.31))
+}
+
+data = data.frame(ages)
+
+data$BenignVsCA <- mapply(gen_Ca, ages)
+
+data$Tumors<- mapply(apply_genTumor, data$BenignVsCA)
+
+data
+
+
+
+
+
+
+length(data$BenignVsCA)
+data$BenignVsCA 
+
 
 vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - 1) * exp(-.25*k*t))^4}
 
@@ -54,8 +83,9 @@ mriDetect <- function(k, t_0, t_1){vol(3,k) < t_0 & vol(4,k) > t_1 }
 
 filter <- mapply(mriDetect, k_Values, t_0 = 3, t_1 = 4)
 
-
 plot(volumes[filter], ylim=c(0,128))
+
+
 
 
 
