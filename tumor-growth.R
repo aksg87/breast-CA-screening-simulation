@@ -7,22 +7,33 @@ location <- log(m^2 / sqrt(s^2 + m^2))
 shape <- sqrt(log(1 + (s^2 / m^2)))
 print(paste("location:", location))
 print(paste("shape:", shape))
-k_Values <- rlnorm(n=1000, location, shape)
+k_Values <- rlnorm(n=10, location, shape)
 
 k_Values
 
 #https://msalganik.wordpress.com/2017/01/21/making-sense-of-the-rlnorm-function-in-r/
 #one million draws from a log-normal distribution with a mean of 7 and a standard deviation of 75
 
-vol = function(t, k){ 128 / (1 + ((128/.01)^.25 - 1) * exp(-.25*k*t))^4}
+vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - 1) * exp(-.25*k*t))^4}
 
-vol_afterTime = function(k) {vol(6,k)}
-volumes <-mapply(vol_afterTime,k_Values)
+volumes <-mapply(vol, t=3, k_Values)
 mean(volumes)
-plot(volumes)
+
+plot(volumes, ylim=c(0,128))
+
+mriDetect <- function(k, t_0, t_1){vol(3,k) < t_0 & vol(4,k) > t_1 }
+
+
+filter <- mapply(mriDetect, k_Values, t_0 = 3, t_1 = 4)
+
+
+plot(volumes[filter], ylim=c(0,128))
+
+
+
 
 #check change in tumor after 1.7 years
-ratio = function(k) {vol(7.7,k)/vol(6, k)}
+ratio = function(k) {vol(2.7,k)/vol(1, k)}
 ratio_Values <- mapply(ratio,k_Values)
 mean(ratio_Values)
 
