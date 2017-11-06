@@ -1,15 +1,38 @@
-#{α1, α2, β1, β2} = {1.07, 1.31, 1.47, 6.51}
-set.seed(4)
+# {α1, α2, β1, β2} = {1.07, 1.31, 1.47, 6.51}
+# assuming cell size = 0.001 mm
 
-m <- 1.07
-s <- 1.31
-location <- log(m^2 / sqrt(s^2 + m^2))
-shape <- sqrt(log(1 + (s^2 / m^2)))
-print(paste("location:", location))
-print(paste("shape:", shape))
-k_Values <- rlnorm(n=10, location, shape)
+vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - 1) * exp(-.25*k*t))^4}
 
-k_Values
+generate_K <- function(α1, α2) {
+  set.seed(4)
+  
+  m <- α1
+  s <- 1.31
+  location <- log(m^2 / sqrt(s^2 + m^2))
+  shape <- sqrt(log(1 + (s^2 / m^2)))
+  print(paste("location:", location))
+  print(paste("shape:", shape))
+  k_Values <- rlnorm(n=10, location, shape)
+  
+  return(k_Values)
+}
+
+generate_tumor <- function(k) {
+  
+  for (tumor_year in 0:30) {
+    size <- vol(tumor_year, k)
+    if (size >= 8)
+      break;
+  }
+  
+  return(tumor_year);
+}
+
+ks <- generate_K(1.07,1.31)
+
+generate_tumor(ks[8])
+
+
 
 #https://msalganik.wordpress.com/2017/01/21/making-sense-of-the-rlnorm-function-in-r/
 #one million draws from a log-normal distribution with a mean of 7 and a standard deviation of 75
@@ -22,7 +45,6 @@ mean(volumes)
 plot(volumes, ylim=c(0,128))
 
 mriDetect <- function(k, t_0, t_1){vol(3,k) < t_0 & vol(4,k) > t_1 }
-
 
 filter <- mapply(mriDetect, k_Values, t_0 = 3, t_1 = 4)
 
