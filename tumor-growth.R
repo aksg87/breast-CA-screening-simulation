@@ -1,36 +1,42 @@
-# {α1, α2, β1, β2} = {1.07, 1.31, 1.47, 6.51}
-# assuming cell size = 0.001 mm
+# {α1, α2, β1, β2} = {1.07, 1.31, 1.47, 6.51}  / assuming cell size = 0.001 mm
+set.seed(4)
 
 vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - 1) * exp(-.25*k*t))^4}
 
 generate_K <- function(α1, α2) {
-  set.seed(4)
-  
+
   m <- α1
   s <- 1.31
   location <- log(m^2 / sqrt(s^2 + m^2))
   shape <- sqrt(log(1 + (s^2 / m^2)))
   print(paste("location:", location))
   print(paste("shape:", shape))
-  k_Values <- rlnorm(n=10, location, shape)
+  k_Values <- rlnorm(n=1, location, shape)
   
   return(k_Values)
 }
 
-generate_tumor <- function(k) {
+generate_tumor <- function(α1, α2) {
   
-  for (tumor_year in 0:30) {
+  k <- generate_K(α1, α2)
+    
+  for (tumor_year in 0:20) {
     size <- vol(tumor_year, k)
     if (size >= 8)
       break;
   }
   
-  return(tumor_year);
+  if (tumor_year > 20){
+    generate_tumor(α1, α2) #search for another tumor
+  }
+  else
+    return( c(α1=α1, α2=α2,tumor_year=tumor_year, k=k))
 }
 
 ks <- generate_K(1.07,1.31)
 
-generate_tumor(ks[8])
+generate_tumor(1.07,1.31)
+
 
 
 
