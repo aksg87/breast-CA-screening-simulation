@@ -10,19 +10,16 @@ generate_K <- function(α1, α2) {
   s <- α2
   location <- log(m^2 / sqrt(s^2 + m^2))
   shape <- sqrt(log(1 + (s^2 / m^2)))
-  print(paste("location:", location))
-  print(paste("shape:", shape))
   k_Values <- rlnorm(n=1, location, shape)
   
   return(k_Values)
 }
 
-(4/3)*pi*(4)^3
 
 generate_tumor <- function(α1, α2, interval) {
   
   k <- generate_K(α1, α2)
-  tumor_year <- 0
+  tumor_year <- sample(0:interval, 1, replace = FALSE)
   
   while (TRUE) {
     size <- vol(tumor_year, k)
@@ -40,41 +37,28 @@ generate_tumor <- function(α1, α2, interval) {
 
 }
 
-ks <- generate_K(1.07,1.31)
-
-generate_tumor(1.07,1.31, 1)
-
-
-
-
 
 # *************
 
 n <- 1000
 ages <-sample(40:70, n, replace = TRUE)
 pCA <- 0.02
-gen_Ca <- function(age) { sample(c('Benign', 'CA'),size = 1, replace = TRUE, c(1 - pCA, pCA))}
+gen_Ca <- function(age) { sample(c('Benign', 'CA'), size = 1, replace = TRUE, c(1 - pCA, pCA))}
 
-apply_genTumor <- function(cancerStatus) {
+apply_genTumor <- function(cancerStatus, interval) {
     
   if (cancerStatus != 'CA')
     return (NA)
   else
-    return (generate_tumor(1.07,1.31))
+    return (generate_tumor(1.07,1.31,interval))
 }
 
 data = data.frame(ages)
-
 data$BenignVsCA <- mapply(gen_Ca, ages)
+data$Tumors<- mapply(apply_genTumor, interval=1, data$BenignVsCA)
 
-data$Tumors<- mapply(apply_genTumor, data$BenignVsCA)
-
-data$Tumor[[6]][1]
-
-summary(data$Tumors)
-
-summary(data$BenignVsCA)
-
+#summary(data$Tumors)
+#summary(data$BenignVsCA)
 
 results <- data[data$BenignVsCA == "CA",]
 
