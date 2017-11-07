@@ -19,18 +19,20 @@ generate_K <- function(α1, α2) {
 
 (4/3)*pi*(4)^3
 
-generate_tumor <- function(α1, α2) {
+generate_tumor <- function(α1, α2, interval) {
   
   k <- generate_K(α1, α2)
-    
-  for (tumor_year in 0:20) {
+  tumor_year <- 0
+  
+  while (TRUE) {
     size <- vol(tumor_year, k)
-    if (size >= 8)
+    if (size >= 8 | tumor_year >= 20)
       break;
+    tumor_year <- tumor_year + 1
   }
   
   if (tumor_year >= 20){
-    generate_tumor(α1, α2) #search for another tumor
+    generate_tumor(α1, α2, interval) #search for another tumor
   }
   else
     return( c(tumor_year=tumor_year, size= size , vol(tumor_year+1, k), vol(tumor_year+2, k),vol(tumor_year+3, k), k=k))
@@ -40,7 +42,7 @@ generate_tumor <- function(α1, α2) {
 
 ks <- generate_K(1.07,1.31)
 
-generate_tumor(1.07,1.31)
+generate_tumor(1.07,1.31, 1)
 
 
 
