@@ -94,8 +94,8 @@ intervalApply2 <- function(interval){
 mean_volume <- mapply(intervalApply, intervals)
 sd_volume <- mapply(intervalApply2, intervals)
 
-plot(mean_volume, ylim=c(0,50), xlab="MRI interval of screening (years)", ylab="mean tumor volume")
-plot(sd_volume, ylim=c(0,50), xlab="MRI interval of screening (years)", ylab="sd tumor volume")
+plot(mean_volume, ylim=c(0,50), main="mean tumor volume on MRI detection", xlab="MRI interval of screening (years)", ylab="mean tumor volume mm")
+plot(sd_volume, ylim=c(0,50), main="σ of tumor volumes on MRI detection",  xlab="MRI interval of screening (years)", ylab="sd tumor volume mm")
 
 
 
