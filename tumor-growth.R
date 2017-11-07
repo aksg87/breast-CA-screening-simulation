@@ -27,12 +27,13 @@ generate_tumor <- function(α1, α2) {
       break;
   }
   
-  if (tumor_year > 20){
+  if (tumor_year >= 20){
     generate_tumor(α1, α2) #search for another tumor
   }
   else
-    return( c(α1=α1, α2=α2,tumor_year=tumor_year, k=k))
-    #return( tumor_year)
+    return( c(tumor_year=tumor_year, size= size , vol(tumor_year+1, k), vol(tumor_year+2, k),vol(tumor_year+3, k), k=k))
+    #return( c(α1=α1, α2=α2,tumor_year=tumor_year, k=k))
+
 }
 
 ks <- generate_K(1.07,1.31)
@@ -41,9 +42,12 @@ generate_tumor(1.07,1.31)
 
 
 
+
+
 # *************
 
-ages <-sample(40:70, 100, replace = TRUE)
+n <- 1000
+ages <-sample(40:70, n, replace = TRUE)
 pCA <- 0.02
 gen_Ca <- function(age) { sample(c('Benign', 'CA'),size = 1, replace = TRUE, c(1 - pCA, pCA))}
 
@@ -61,15 +65,32 @@ data$BenignVsCA <- mapply(gen_Ca, ages)
 
 data$Tumors<- mapply(apply_genTumor, data$BenignVsCA)
 
-data
+results <- data[data$BenignVsCA == "CA",]
+
+results
 
 
 
+#lapply(results, function(x) write.table( data.frame(x), 'test.csv'  , append= T, sep=',' ))
+
+capture.output(results, file = "My New File.csv")
+
+
+my.df <- data.frame(lapply(old.df, as.numeric), stringsAsFactors=FALSE)
 
 
 
-length(data$BenignVsCA)
-data$BenignVsCA 
+write.table(
+  results,
+  na = "",
+  file = "tumorSizes.csv",
+  sep = ",",
+  col.names = NA,
+  qmethod = "double"
+)
+
+
+
 
 
 vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - 1) * exp(-.25*k*t))^4}
