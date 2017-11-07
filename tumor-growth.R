@@ -7,7 +7,7 @@ generate_K <- function(α1, α2) {
   #https://msalganik.wordpress.com/2017/01/21/making-sense-of-the-rlnorm-function-in-r/
   
   m <- α1
-  s <- 1.31
+  s <- α2
   location <- log(m^2 / sqrt(s^2 + m^2))
   shape <- sqrt(log(1 + (s^2 / m^2)))
   print(paste("location:", location))
@@ -16,6 +16,8 @@ generate_K <- function(α1, α2) {
   
   return(k_Values)
 }
+
+(4/3)*pi*(4)^3
 
 generate_tumor <- function(α1, α2) {
   
@@ -65,6 +67,13 @@ data$BenignVsCA <- mapply(gen_Ca, ages)
 
 data$Tumors<- mapply(apply_genTumor, data$BenignVsCA)
 
+data$Tumor[[6]][1]
+
+summary(data$Tumors)
+
+summary(data$BenignVsCA)
+
+
 results <- data[data$BenignVsCA == "CA",]
 
 results
@@ -73,15 +82,10 @@ results
 
 #lapply(results, function(x) write.table( data.frame(x), 'test.csv'  , append= T, sep=',' ))
 
-capture.output(results, file = "My New File.csv")
-
-
-my.df <- data.frame(lapply(old.df, as.numeric), stringsAsFactors=FALSE)
-
 
 
 write.table(
-  results,
+  data$BenignVsCA,
   na = "",
   file = "tumorSizes.csv",
   sep = ",",
