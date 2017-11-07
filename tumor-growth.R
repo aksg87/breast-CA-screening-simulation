@@ -20,28 +20,25 @@ generate_tumor <- function(α1, α2, interval) {
   
   k <- generate_K(α1, α2)
   tumor_year <- sample(0:interval, 1, replace = FALSE)
+  tumor_time_upper <-20
   
   while (TRUE) {
     size <- vol(tumor_year, k)
-    if (size >= 8 | tumor_year >= 20)
+    if (size >= 8 | tumor_year >= tumor_time_upper)
       break;
     tumor_year <- tumor_year + 1
   }
   
-  if (tumor_year >= 20){
+  if (tumor_year >= tumor_time_upper){
     generate_tumor(α1, α2, interval) #search for another tumor
   }
   else
-    return( c(tumor_year=tumor_year, size= size , vol(tumor_year+1, k), vol(tumor_year+2, k),vol(tumor_year+3, k), k=k))
+    return(size)
+    #return( c(tumor_year=tumor_year, size= size , vol(tumor_year+1, k), vol(tumor_year+2, k),vol(tumor_year+3, k), k=k))
     #return( c(α1=α1, α2=α2,tumor_year=tumor_year, k=k))
 
 }
 
-
-# *************
-
-n <- 1000
-ages <-sample(40:70, n, replace = TRUE)
 pCA <- 0.02
 gen_Ca <- function(age) { sample(c('Benign', 'CA'), size = 1, replace = TRUE, c(1 - pCA, pCA))}
 
@@ -53,16 +50,52 @@ apply_genTumor <- function(cancerStatus, interval) {
     return (generate_tumor(1.07,1.31,interval))
 }
 
+
+n <- 1000
+interval <- 1
+ages <-sample(40:70, n, replace = TRUE)
+
 data = data.frame(ages)
 data$BenignVsCA <- mapply(gen_Ca, ages)
-data$Tumors<- mapply(apply_genTumor, interval=1, data$BenignVsCA)
+data$Tumors<- mapply(apply_genTumor, interval=2, data$BenignVsCA)
 
 #summary(data$Tumors)
 #summary(data$BenignVsCA)
 
 results <- data[data$BenignVsCA == "CA",]
 
-results
+mean(data[data$BenignVsCA == "CA",]$Tumors)
+
+
+
+
+intervalApply <- function(interval){
+  n <- 1000
+  set.seed(4)
+  ages <-sample(40:70, n, replace = TRUE)
+  data = data.frame(ages)
+  data$BenignVsCA <- mapply(gen_Ca, ages)
+  data$Tumors<- mapply(apply_genTumor, interval=interval, data$BenignVsCA)
+  m <- mean(data[data$BenignVsCA == "CA",]$Tumors)
+  return(m)
+}
+
+intervalApply2 <- function(interval){
+  n <- 1000
+  set.seed(4)
+  ages <-sample(40:70, n, replace = TRUE)
+  data = data.frame(ages)
+  data$BenignVsCA <- mapply(gen_Ca, ages)
+  data$Tumors<- mapply(apply_genTumor, interval=interval, data$BenignVsCA)
+  m <- sd(data[data$BenignVsCA == "CA",]$Tumors)
+  return(m)
+}
+
+mean_volume <- mapply(intervalApply, intervals)
+sd_volume <- mapply(intervalApply2, intervals)
+
+plot(mean_volume, ylim=c(0,50), xlab="MRI interval of screening (years)", ylab="mean tumor volume")
+plot(sd_volume, ylim=c(0,50), xlab="MRI interval of screening (years)", ylab="sd tumor volume")
 
 
 
