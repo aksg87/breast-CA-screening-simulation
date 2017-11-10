@@ -1,6 +1,3 @@
-#library(plyr)
-
-#clears workspace and setup
 set.seed(4)
 
 ls()

@@ -1,7 +1,7 @@
 # {α1, α2, β1, β2} = {1.07, 1.31, 1.47, 6.51}  / assuming cell size = 0.001 mm
 set.seed(4)
 
-vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - 1) * exp(-.25*k*t))^4}
+vol = function(t, k){ 128 / (1 + ((128/.001)^.25 - .001) * exp(-.25*k*t))^4}
 
 generate_K <- function(α1, α2) {
   #https://msalganik.wordpress.com/2017/01/21/making-sense-of-the-rlnorm-function-in-r/
@@ -24,7 +24,7 @@ generate_tumor <- function(α1, α2, interval) {
   
   while (TRUE) {
     size <- vol(tumor_year, k)
-    if (size >= 8 | tumor_year >= tumor_time_upper)
+    if (size >= 5 | tumor_year >= tumor_time_upper)
       break;
     tumor_year <- tumor_year + 1
   }
