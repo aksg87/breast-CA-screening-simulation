@@ -1,9 +1,10 @@
 set.seed(4)
+library(plyr)
 
 ls()
 
 #population size
-n <- 10
+n <- 10000
 ages <-
   sample(40:70, n, replace = TRUE) #uniform distribution
 class <- sample(0:1, n, replace = TRUE) #0 is mammo arm & 1 is MRI arm
@@ -77,7 +78,7 @@ mriIncidentBenignVsCA <- function(grade) {
   }
   
   else if (grade == 'BR45') {
-    pCA <- 2.26 / 100
+    pCA <- 0.69 / 100
     
   }
   else {
@@ -95,24 +96,17 @@ mriIncidentBenignVsCA <- function(grade) {
 
 data <- data.frame(ages, class)
 
-
-
 data["MRI_Prev_BIRADS"] <- mapply(mriBIRADS, data$class)
 
 data["MRI_BenignVsCA"] <-
   mapply(mriBenignVsCA, data$MRI_Prev_BIRADS)
-
-
 
 data["MRI_Inc_BIRADS_0"] <-
   mapply(mriIncidentBIRADS, data$MRI_Prev_BIRADS, data$MRI_BenignVsCA)
 data["MRI_Inc_BenignVsCA_0"] <-
   mapply(mriIncidentBenignVsCA, data$MRI_Inc_BIRADS_0)
 
-for (year in 0:20) {
-  print(data)
-  print(paste("The year is current + ", year))
-  
+for (year in 0:2) {
   BR <- paste(c("MRI_Inc_BIRADS", year), collapse = "_")
   B_vs_Ca <- paste(c("MRI_Inc_BenignVsCA", year), collapse = "_")
   
@@ -123,23 +117,97 @@ for (year in 0:20) {
   data[, BR_new] <-
     mapply(mriIncidentBIRADS, data[, BR], data[, B_vs_Ca])
   data[,B_vs_Ca_new] <-mapply(mriIncidentBenignVsCA, data[,BR_new])
-  
 }
-
-
 
 # data[paste(c("MRI_Inc_BIRADS", 0+1), collapse = "_")] <-mapply(mriIncidentBIRADS, data$paste(c("MRI_Inc_BenignVsCA", 0), collapse = "_"))
 data[sapply(data, is.character)] <-
   lapply(data[sapply(data, is.character)], as.factor)
 
-summary(data)
+toCost = function(x){
+  if (is.na(x)) {
+    return (0)
+  }
+  
+  else if (x == 'BR12') {
+    return (626)
+  }
+  else if (x == 'BR3'){
+    return (626+626)
+  }
+  else if (x == 'BR45') {
+    return (626+1100)
+  }
+  else {
+    return (0)
+  }
+}
 
+selectCA = function(x){
+  if (is.na(x)) {
+    return (0)
+  }
+  
+  else if (x == 'CA') {
+    return (1)
+  }
+  else {
+    return (0)
+  }
+}
+
+dataAsDollars <- as.data.frame(lapply(data, FUN = function(x) {sapply(x, FUN = toCost)}))
+
+selectCancers <-as.data.frame(lapply(data, FUN = function(x) { sum(sapply(x, FUN = selectCA) )  }))
+
+dataSum <- as.data.frame(lapply(dataAsDollars, FUN = sum))
+
+dataCount <- as.data.frame(sapply(data[], FUN = count))
+
+selectCancers
+
+table(data)
 
 write.table(
   data,
   na = "",
-  file = "mammo-MRI-screening.csv",
+  file = "MRI_Intervals.csv",
   sep = ",",
   col.names = NA,
   qmethod = "double"
 )
+
+
+write.table(
+  dataAsDollars,
+  na = "",
+  file = "Dollar_Conversion.csv",
+  sep = ",",
+  col.names = NA,
+  qmethod = "double"
+)
+
+write.table(
+  dataSum,
+  na = "",
+  file = "Dollar_Sum.csv",
+  sep = ",",
+  col.names = NA,
+  qmethod = "double"
+)
+
+write.table(
+  selectCancers,
+  na = "",
+  file = "Cancer_Count.csv",
+  sep = ",",
+  col.names = NA,
+  qmethod = "double"
+)
+
+summary(data)
+
+# Reference
+# df <- as.data.frame(matrix(runif(5 * 5), 5, 5))
+# convert <- function(x) {if ( x < 0.5) return (0) else return (1)}
+# df2 <- as.data.frame(lapply(df[ ], FUN = function(x) {sapply(x, FUN = convert)}))
+
