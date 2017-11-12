@@ -42,12 +42,12 @@ generate_tumor <- function(α1, α2, interval) {
 pCA <- 0.02
 gen_Ca <- function(age) { sample(c('Benign', 'CA'), size = 1, replace = TRUE, c(1 - pCA, pCA))}
 
-apply_genTumor <- function(cancerStatus, interval) {
+apply_genTumor <- function(cancerStatus, interval, α1, α2) {
     
   if (cancerStatus != 'CA')
     return (NA)
   else
-    return (generate_tumor(1.07,1.31,interval))
+    return (generate_tumor(α1, α2,interval))
 }
 
 
@@ -55,9 +55,20 @@ n <- 1000
 interval <- 1
 ages <-sample(40:70, n, replace = TRUE)
 
+
+
+
+
+
+
+
+
+α1 = 1.07
+α2 = 1.31
+
 data = data.frame(ages)
 data$BenignVsCA <- mapply(gen_Ca, ages)
-data$Tumors<- mapply(apply_genTumor, interval=2, data$BenignVsCA)
+data$Tumors<- mapply(apply_genTumor, interval=2, α1 = α1 , α2 = α2, data$BenignVsCA)
 
 #summary(data$Tumors)
 #summary(data$BenignVsCA)
@@ -67,37 +78,70 @@ results <- data[data$BenignVsCA == "CA",]
 mean(data[data$BenignVsCA == "CA",]$Tumors)
 
 
+α1 = 1.07
+α2 = 1.31
 
-
-intervalApply <- function(interval){
+intervalApply <- function(interval, α1, α2){
   n <- 1000
   set.seed(4)
   ages <-sample(40:70, n, replace = TRUE)
   data = data.frame(ages)
   data$BenignVsCA <- mapply(gen_Ca, ages)
-  data$Tumors<- mapply(apply_genTumor, interval=interval, data$BenignVsCA)
+  data$Tumors<- mapply(apply_genTumor, interval=interval, α1 = α1 , α2 = α2, data$BenignVsCA)
   m <- mean(data[data$BenignVsCA == "CA",]$Tumors)
   return(m)
 }
 
-intervalApply2 <- function(interval){
+intervalApply2 <- function(interval, α1, α2){
   n <- 1000
   set.seed(4)
   ages <-sample(40:70, n, replace = TRUE)
   data = data.frame(ages)
   data$BenignVsCA <- mapply(gen_Ca, ages)
-  data$Tumors<- mapply(apply_genTumor, interval=interval, data$BenignVsCA)
+  data$Tumors<- mapply(apply_genTumor, interval=interval, α1 = α1 , α2 = α2,  data$BenignVsCA)
   m <- sd(data[data$BenignVsCA == "CA",]$Tumors)
   return(m)
 }
 
-<<<<<<< Updated upstream
+
+
+generateData <- function(α1, α2){
+  
+  mean_volume <- mapply(intervalApply, intervals, α1 = α1 , α2 = α2)
+  sd_volume <- mapply(intervalApply2, intervals, α1 = α1 , α2 = α2)
+  
+  png(filename="/Users/akshaygoel/Desktop/Mean.png")
+  plot(mean_volume, ylim=c(0,50), xlim=c(0,20), main="mean tumor volume on detection", xlab="MRI interval of screening (years)", ylab="mean tumor volume (mm diameter)")
+  mtext(paste0("all patients (detection at size > 4 mm)  (α1 ", α1, "  α2 ", α2,")"))
+
+  dev.off()
+  
+  
+  png(filename="/Users/akshaygoel/Desktop/sd.png")
+  plot(sd_volume, ylim=c(0,50), xlim=c(0,20), main="σ of tumor volumes on detection",  xlab="MRI interval of screening (years)", ylab="σ tumor volume (mm diameter)")
+  mtext(paste0("all patients (detection at size > 4 mm)  (α1 ", α1, "  α2 ", α2,")"))
+  dev.off()
+
+}
+
+
+
+
+generateData(1.07, 1.31)
+
+
+
 mean_volume <- mapply(intervalApply, intervals)
 sd_volume <- mapply(intervalApply2, intervals)
 
+png(filename="/Users/akshaygoel/Desktop/Mean.png")
 plot(mean_volume, ylim=c(0,50), main="mean tumor volume on MRI detection", xlab="MRI interval of screening (years)", ylab="mean tumor volume mm")
+dev.off()
+
+
 plot(sd_volume, ylim=c(0,50), main="σ of tumor volumes on MRI detection",  xlab="MRI interval of screening (years)", ylab="sd tumor volume mm")
-=======
+
+
 intervalApply3 <- function(interval, α1, α2){
   n <- 1000
   set.seed(4)
@@ -118,11 +162,16 @@ plot(sd_volume, ylim=c(0,50), xlim=c(0,20), main="σ of tumor volumes on detecti
 mtext("all patients (detection at size > 4 mm)")
 
 
+
+
+
+
+
 # For all age groups combined, model parameters were estimated as 
 # {α1, α2, β1, β2} = {1.07, 1.31, 1.47, 6.51}, while the two age 
 # groups 50 to 59 years and 60 to 69 years gave estimates of
 # {1.38, 1.36, 1.50, 6.33} and {0.70, 1.18, 1.46, 6.65}, respectively. 
->>>>>>> Stashed changes
+
 
 
 
