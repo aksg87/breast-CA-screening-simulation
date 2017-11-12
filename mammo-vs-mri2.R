@@ -138,13 +138,13 @@ toCost = function(x){
   }
   
   else if (x == 'BR12') {
-    return (626)
+    return (500)
   }
   else if (x == 'BR3'){
-    return (626+626)
+    return (500+500)
   }
   else if (x == 'BR45') {
-    return (626+1100)
+    return (500+1100)
   }
   else {
     return (0)
@@ -228,10 +228,10 @@ mammoBIRADS <- function(class) {
     c('BR3', 'BR45', 'REC', 'BR12'),
     size = 1,
     replace = TRUE,
-    c(.023, 0.015, 0.10, (1 - 0.23 - 0.015 - 0.10))
+    c(.023, 0.015, 0.185, (1 - 0.23 - 0.015 - 0.185))
     
-    # RECALL – 10% ($188)         N and $
-    #   BR3 – 2.3%    ($300)                     N and $
+    # RECALL – 10% ($188->467)         N and $
+    #   BR3 – 2.3%    ($300->650)                     N and $
     #   BR4/5 – 1.5%   ($1000)                    N and $
     
   )
@@ -270,7 +270,7 @@ mammoIncidentBIRADS <- function(grade, cancerStatus) {
     c('BR3', 'BR45', 'REC', 'BR12'),
     size = 1,
     replace = TRUE,
-    c(.023, 0.015, 0.07, (1 - 0.23 - 0.015 - 0.10))
+    c(.023, 0.015, 0.085, (1 - 0.23 - 0.015 - 0.085))
     
     # RECALL – 7%  ($188)         N and $
     #   BR3 – 2.3%    ($300)                     N and $
@@ -313,7 +313,7 @@ data["MAMMO_Inc_BenignVsCA_0"] <-
   mapply(mammoIncidentBenignVsCA, data$MAMMO_Inc_BIRADS_0)
 
 year <- 0
-for (year in 0:10) {
+for (year in 0:30) {
   BR <- paste(c("MAMMO_Inc_BIRADS", year), collapse = "_")
   B_vs_Ca <- paste(c("MAMMO_Inc_BenignVsCA", year), collapse = "_")
   
@@ -334,15 +334,18 @@ toCost = function(x){
   if (is.na(x)) {
     return (0)
   }
+  else if (x == 'BR12') {
+    return (155)
+  }
   
   else if (x == 'REC') {
-    return (80+188)
+    return (155+467)
   }
   else if (x == 'BR3'){
-    return (80+300)
+    return (155+650)
   }
   else if (x == 'BR45') {
-    return (80 + 1000)
+    return (155 + 1000)
   }
   else {
     return (0)
