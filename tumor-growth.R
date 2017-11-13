@@ -57,7 +57,7 @@ intervalApply <- function(interval, α1, α2, seed){
   
   print(interval)
   
-  n <- 100000
+  n <- 1000
   
   set.seed(seed)
   ages <-sample(40:70, n, replace = TRUE)
@@ -66,9 +66,12 @@ intervalApply <- function(interval, α1, α2, seed){
   data$Tumors<- mapply(apply_genTumor, interval=interval, α1 = α1 , α2 = α2, data$BenignVsCA)
   m <- mean(data[data$BenignVsCA == "CA",]$Tumors)
   sd <- sd(data[data$BenignVsCA == "CA",]$Tumors)
-  return(list(mean=m, sd=sd))
+  q95 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .95)
+  q75 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .75)
+  q50 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .50)
+  
+  return(list(mean=m, sd=sd, q95=q95, q75=q75, q50=q50))
 }
-
 
 generateData <- function(α1, α2, title){
   
@@ -76,20 +79,33 @@ generateData <- function(α1, α2, title){
   
   results <- sapply(results, function(x)unlist(x))
   
-  mean_volume <- results[c(TRUE, FALSE)]
-  sd_volume <- results[c(FALSE, TRUE)]
-  
+  mean_volume <- results[c(TRUE, FALSE, FALSE, FALSE, FALSE)]
+  sd_volume <- results[c(FALSE, TRUE, FALSE, FALSE, FALSE)]
+  p95 <- results[c(FALSE, FALSE, TRUE, FALSE, FALSE)]
+  p75 <- results[c(FALSE, FALSE, FALSE, TRUE, FALSE)]
+  p50 <- results[c(FALSE, FALSE, FALSE, FALSE, TRUE)]    
   
   png(filename=paste0("/Users/akshaygoel/Desktop/α1-", α1,"-α2-",α2,"-mean.png"), width = 4, height = 5, units = 'in', res = 150)
-  plot(mean_volume, ylim=c(0,50), xlim=c(0,20), main="mean tumor volume on detection", xlab="MRI interval of screening (years)", ylab="mean tumor volume (mm diameter)")
+  plot(mean_volume, ylim=c(0,50), xlim=c(0,20), cex = 0.30, main="mean tumor volume on detection", xlab="MRI interval of screening (years)", ylab="mean tumor volume (mm diameter)")
+  
+  lines(p95, lty = "dotdash")
+  lines(p75, lty = "dotted")
+  lines(p50, lty = "longdash")
+    
   mtext(paste0(title))
-  text(intervals, mean_volume - 1.2, paste(round(mean_volume, digits = 1)), cex=0.35)
+  
+  # text(intervals, mean_volume + 1.2, paste(round(mean_volume, digits = 1)), cex=0.30)
+  
+  text(intervals, p95 + 1.6, paste(round(p95, digits = 1)), cex=0.30)
+  
+  text(intervals, p50 - 1.6, paste(round(p50, digits = 1)), cex=0.30)
+  
   dev.off()
   
   png(filename=paste0("/Users/akshaygoel/Desktop/α1-", α1,"-α2-",α2,"-sd.png"),, width = 4, height = 5, units = 'in', res = 150)
-  plot(sd_volume, ylim=c(0,50), xlim=c(0,20), main="σ of tumor volumes on detection",  xlab="MRI interval of screening (years)", ylab="σ tumor volume (mm diameter)")
+  plot(sd_volume, ylim=c(0,50), xlim=c(0,20), cex = 0.30, main="σ of tumor volumes on detection",  xlab="MRI interval of screening (years)", ylab="σ tumor volume (mm diameter)")
   mtext(paste0(title))
-  text(intervals, sd_volume - 1.2, paste(round(sd_volume, digits = 1)), cex=0.35)
+  text(intervals, sd_volume + 1.2, paste(round(sd_volume, digits = 1)), cex=0.30)
   dev.off()
   
   return(list(mean_volume,sd_volume))
@@ -115,14 +131,9 @@ young <- generateData(1.38, 1.36,  "age group 50 to 59")
 old <- generateData(0.70, 1.18, "age group 60 to 69")
 
 
-
-
 young_vs_old_mean <- unlist(young[1])-unlist(old[1])
 young_vs_old_sd <- unlist(young[2])-unlist(old[2])
 
-mean(young_vs_old_mean)
-
-mean(young_vs_old_sd)
 
 
 png(filename=paste0("/Users/akshaygoel/Desktop/young-mean-vs-old-mean.png"), width = 4, height = 5, units = 'in', res = 150)
@@ -136,17 +147,15 @@ text(intervals, young_vs_old_sd + 1.2, paste(round(young_vs_old_sd, digits = 1))
 dev.off()
 
 
-
 generateTumorGraph(1.07, 1.31, "all patients")
 generateTumorGraph(1.38, 1.36, "age group 50 to 59")
 generateTumorGraph(0.70, 1.18, "age group 60 to 69")
 
 
-
 results <- mapply(intervalApply, intervals, α1 = α1 , α2 = α2, seed = 3)
-results <- sapply(results, function(x)unlist(x))
-mean_volume <- results[c(TRUE, FALSE)]
-sd_volume <- results[c(FALSE, TRUE)]
+results <- sapply(results, function(x) unlist(x))
+mean_volume <- results[c(TRUE, FALSE, FALSE, FALSE)]
+sd_volume <- results[c(FALSE, TRUE, FALSE, FALSE)]
 
 
 
@@ -167,9 +176,11 @@ intervalApply3 <- function(interval, α1, α2){
 }
 
 
+x<-rnorm(10)
 
+plot()
 
-
+lines(x, col="green")
 
 
 
