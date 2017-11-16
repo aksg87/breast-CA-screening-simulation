@@ -9,7 +9,7 @@ generate_K <- function(α1, α2) {
   #https://msalganik.wordpress.com/2017/01/21/making-sense-of-the-rlnorm-function-in-r/
   
   m <- α1
-  s <- α2
+  s <- α2 
   location <- log(m^2 / sqrt(s^2 + m^2))
   shape <- sqrt(log(1 + (s^2 / m^2)))
   k_Values <- rlnorm(n=1, location, shape)
@@ -57,7 +57,7 @@ intervalApply <- function(interval, α1, α2, seed){
   
   print(interval)
   
-  n <- 1000
+  n <- 100000
   
   set.seed(seed)
   ages <-sample(40:70, n, replace = TRUE)
@@ -66,51 +66,85 @@ intervalApply <- function(interval, α1, α2, seed){
   data$Tumors<- mapply(apply_genTumor, interval=interval, α1 = α1 , α2 = α2, data$BenignVsCA)
   m <- mean(data[data$BenignVsCA == "CA",]$Tumors)
   sd <- sd(data[data$BenignVsCA == "CA",]$Tumors)
+  
+  q99 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .99)
   q95 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .95)
+  q90 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .90)
+  q85 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .85)
+  q80 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .80)
   q75 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .75)
   q50 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .50)
+  q25 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .25)
+  q10 <- quantile(data[data$BenignVsCA == "CA",]$Tumors, .10)
+    
   
-  return(list(mean=m, sd=sd, q95=q95, q75=q75, q50=q50))
+  return(list(mean=m, sd=sd, q99=q99, q95=q95, q90=q90,q85=q85,q80=q80,q75=q75, q50=q50, q25=q25, q10=q10))
 }
 
+
+
 generateData <- function(α1, α2, title){
-  
+
   results <- mapply(intervalApply, intervals, α1 = α1 , α2 = α2, 5)
   
   results <- sapply(results, function(x)unlist(x))
   
-  mean_volume <- results[c(TRUE, FALSE, FALSE, FALSE, FALSE)]
-  sd_volume <- results[c(FALSE, TRUE, FALSE, FALSE, FALSE)]
-  p95 <- results[c(FALSE, FALSE, TRUE, FALSE, FALSE)]
-  p75 <- results[c(FALSE, FALSE, FALSE, TRUE, FALSE)]
-  p50 <- results[c(FALSE, FALSE, FALSE, FALSE, TRUE)]    
-  
+  mean_volume <- results[c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)]
+  sd_volume <- results[c(FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)]
+  p99 <- results[c(FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)]
+  p95 <- results[c(FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)]
+  p90 <- results[c(FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)]
+  p85 <- results[c(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)]
+  p80 <- results[c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE)]
+  p75 <- results[c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE)]
+  p50 <- results[c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE)]    
+  p25 <- results[c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE)]   
+  p10 <- results[c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE)] 
+      
   png(filename=paste0("/Users/akshaygoel/Desktop/α1-", α1,"-α2-",α2,"-mean.png"), width = 4, height = 5, units = 'in', res = 150)
-  plot(mean_volume, ylim=c(0,50), xlim=c(0,20), cex = 0.30, main="mean tumor volume on detection", xlab="MRI interval of screening (years)", ylab="mean tumor volume (mm diameter)")
-  
-  lines(p95, lty = "dotdash")
-  lines(p75, lty = "dotted")
-  lines(p50, lty = "longdash")
-    
+  plot(p99, cex = 0.30, ylim=c(0,50), col = "white", main="tumor volume percentiles", xlab="MRI interval length (years)", ylab="mean tumor volume (mm diameter)")
+  grid()
+  lines(p99, lty = 1)
+  lines(p95, lty = 2)
+  lines(p90, lty = 3)
+  lines(p85, lty = 4)
+  lines(p80, lty = 5)
+  lines(p75, lty = 6)
+  lines(p50, lty = 7)
+  lines(p25, lty = 8)
+  # lines(p10, lty = 9)
+       
   mtext(paste0(title))
-  
-  # text(intervals, mean_volume + 1.2, paste(round(mean_volume, digits = 1)), cex=0.30)
-  
-  text(intervals, p95 + 1.6, paste(round(p95, digits = 1)), cex=0.30)
-  
-  text(intervals, p50 - 1.6, paste(round(p50, digits = 1)), cex=0.30)
+
+  text(intervals[c(TRUE, TRUE)], p99[c(TRUE, TRUE)]+.5, paste(round(p99[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+  text(intervals[c(TRUE, TRUE)], p95[c(TRUE, TRUE)]+.5, paste(round(p95[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+  text(intervals[c(TRUE, TRUE)], p90[c(TRUE, TRUE)]+.5, paste(round(p90[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+  text(intervals[c(TRUE, TRUE)], p85[c(TRUE, TRUE)]+.5, paste(round(p85[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+  text(intervals[c(TRUE, TRUE)], p80[c(TRUE, TRUE)]+.5, paste(round(p80[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+  text(intervals[c(TRUE, TRUE)], p75[c(TRUE, TRUE)]+.5, paste(round(p75[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+  text(intervals[c(TRUE, TRUE)], p50[c(TRUE, TRUE)]+.5, paste(round(p50[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+  text(intervals[c(TRUE, TRUE)], p25[c(TRUE, TRUE)]+.5, paste(round(p25[c(TRUE, TRUE)], digits = 1)), cex=0.40, font=4)
+
+  legend(16, 25, legend=c("99th %", "95th %", "90th %", "85th %", "80th %", "75th %", "50th %", "25th %"), lty=c(1:8), cex=0.45)
   
   dev.off()
   
-  png(filename=paste0("/Users/akshaygoel/Desktop/α1-", α1,"-α2-",α2,"-sd.png"),, width = 4, height = 5, units = 'in', res = 150)
-  plot(sd_volume, ylim=c(0,50), xlim=c(0,20), cex = 0.30, main="σ of tumor volumes on detection",  xlab="MRI interval of screening (years)", ylab="σ tumor volume (mm diameter)")
-  mtext(paste0(title))
-  text(intervals, sd_volume + 1.2, paste(round(sd_volume, digits = 1)), cex=0.30)
-  dev.off()
+  # png(filename=paste0("/Users/akshaygoel/Desktop/α1-", α1,"-α2-",α2,"-sd.png"),, width = 4, height = 5, units = 'in', res = 150)
+  # plot(sd_volume, ylim=c(0,50), xlim=c(0,20), cex = 0.30, main="σ of tumor volumes on detection",  xlab="MRI interval length (years)", ylab="σ tumor volume (mm diameter)")
+  # mtext(paste0(title))
+  # text(intervals, sd_volume + 1.2, paste(round(sd_volume, digits = 1)), cex=0.30)
+  # dev.off()
   
   return(list(mean_volume,sd_volume))
 
 }
+
+x <- seq(1,10)
+
+plot(x)
+grid()
+
+dev.off()
 
 generateTumorGraph <- function(α1, α2, title){
   apply_gen = function(x){generate_tumor(α1, α2,1)}
@@ -126,9 +160,16 @@ generateTumorGraph <- function(α1, α2, title){
 
 }
 
+
+
 all <- generateData(1.07, 1.31, "all patients")
 young <- generateData(1.38, 1.36,  "age group 50 to 59")
 old <- generateData(0.70, 1.18, "age group 60 to 69")
+
+
+
+
+
 
 
 young_vs_old_mean <- unlist(young[1])-unlist(old[1])
@@ -176,11 +217,7 @@ intervalApply3 <- function(interval, α1, α2){
 }
 
 
-x<-rnorm(10)
 
-plot()
-
-lines(x, col="green")
 
 
 
