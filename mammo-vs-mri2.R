@@ -60,7 +60,7 @@ mriIncidentBIRADS <- function(grade, cancerStatus) {
   else if ((!is.na(cancerStatus) &  cancerStatus == 'Benign')) {
     eventProb <-
       sample(
-        c('BR3', 'BR45', 'BR12'), #DOUBLE LOGIC with BR3
+        c('BR3', 'BR45', 'BR12'), 
         size = 1,
         replace = TRUE,
         c(.032, 0.023, (1 - 0.32 - 0.023))
@@ -138,13 +138,13 @@ toCost = function(x){
   }
   
   else if (x == 'BR12') {
-    return (500)
+    return (549)
   }
   else if (x == 'BR3'){
-    return (500+500)
+    return (549+549)
   }
   else if (x == 'BR45') {
-    return (500+1100)
+    return (549+1100)
   }
   else {
     return (0)
@@ -228,12 +228,9 @@ mammoBIRADS <- function(class) {
     c('BR3', 'BR45', 'REC', 'BR12'),
     size = 1,
     replace = TRUE,
-    c(.023, 0.015, 0.185, (1 - 0.23 - 0.015 - 0.185))
-    
-    # RECALL – 10% ($188->467)         N and $
-    #   BR3 – 2.3%    ($300->650)                     N and $
-    #   BR4/5 – 1.5%   ($1000)                    N and $
-    
+    c(.023, 0.018, 0.098, (1 - .023 - 0.018 - 0.098))
+    # RECALL recetly changed to 9.8%, BR45 to 1.8%
+
   )
   return (eventProb)
 }
@@ -270,7 +267,7 @@ mammoIncidentBIRADS <- function(grade, cancerStatus) {
     c('BR3', 'BR45', 'REC', 'BR12'),
     size = 1,
     replace = TRUE,
-    c(.023, 0.015, 0.085, (1 - 0.23 - 0.015 - 0.085))
+    c(.023, 0.018, 0.098, (1 - .023 - 0.018 - 0.098))
     
     # RECALL – 7%  ($188)         N and $
     #   BR3 – 2.3%    ($300)                     N and $
@@ -335,17 +332,17 @@ toCost = function(x){
     return (0)
   }
   else if (x == 'BR12') {
-    return (155)
+    return (138.17)
   }
   
   else if (x == 'REC') {
-    return (155+467)
+    return (138.17+225.30)
   }
   else if (x == 'BR3'){
-    return (155+650)
+    return (138.17+477.32)
   }
   else if (x == 'BR45') {
-    return (155 + 1000)
+    return (138.17 + 694.26 )
   }
   else {
     return (0)
